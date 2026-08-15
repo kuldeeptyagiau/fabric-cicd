@@ -1,0 +1,14 @@
+SELECT
+    'SELECT ''' + TABLE_SCHEMA + '.' + TABLE_NAME + ''' AS TableName, '''
+    + COLUMN_NAME + ''' AS DateColumn, COUNT(*) AS RowCount, MAX([' + COLUMN_NAME + ']) AS MaxDate FROM ['
+    + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'
+    AS SQLStatement
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE DATA_TYPE IN (
+    'date',
+    'datetime',
+    'datetime2',
+    'smalldatetime',
+    'datetimeoffset'
+)
+ORDER BY TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME;

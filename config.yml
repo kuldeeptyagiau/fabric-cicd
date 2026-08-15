@@ -1,0 +1,65 @@
+core:
+    workspace_id: # Workspace IDs by environment (takes precedence over workspace if both are provided)
+        dev: "7d828536-a77b-4966-811c-c3b7a0c2770b"
+        sandpit: "6dbc43f2-b760-4fd8-873c-2889dd7eb78d"
+        # test: "6dbc43f2-b760-4fd8-873c-2889dd7eb78d"
+        # prod: "7c3e1f8b-2d4a-4b9e-8f2c-1a6c3b7d8e2f"
+
+    repository_directory: "fabric" # relative path
+    parameter: "parameter.yml" # relative path
+
+# Optional - specific item types to include in deployment , If item_types_in_scope is not specified, all item types will be included by default.
+item_types_in_scope:
+  - Notebook
+  - DataPipeline
+  - Lakehouse
+  - Warehouse
+  - SemanticModel
+  - Report
+  - VariableLibrary
+
+
+# The publish section is optional and controls item publishing behavior. If this section is omitted entirely, publishing will run with default 
+# behavior — all items published, no exclusions. It includes various optional settings to enable/disable publishing operations or selectively
+# publish items.
+publish:
+    # # Don't publish items matching this pattern (no feature flag required)
+    # exclude_regex: "^DONT_DEPLOY.*"
+
+    # # Use folder_exclude_regex OR folder_path_to_include, not both for the same environment
+    # folder_exclude_regex:
+    #     dev: "^/DONT_DEPLOY_FOLDER"
+
+    # folder_path_to_include:
+    #     prod:
+    #         - "/DEPLOY_FOLDER"
+    #         - "/DEPLOY_FOLDER/DEPLOY_NESTED_FOLDER"
+
+    # items_to_include:
+    #     test:
+    #       - "Hello World.Notebook"
+    #       - "Run Hello World.DataPipeline"
+    #     prod:
+    #       - "Hello World.Notebook"
+
+    # shortcut_exclude_regex:
+    #     test: "^temp_.*"
+
+    skip:
+        dev: false
+        sandpit: false
+        # test: false
+        # prod: false
+
+# The unpublish section is optional and controls item unpublishing behavior. If this section is omitted entirely, unpublishing will run with 
+# default behavior — all orphan items unpublished, no exclusions. It includes various optional settings to enable/disable unpublishing or 
+# selectively unpublish items.
+unpublish:
+    skip:
+        dev: true
+        test: true
+        prod: true
+
+features:
+    - enable_shortcut_publish
+ 

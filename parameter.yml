@@ -1,0 +1,127 @@
+find_replace:
+    - find_value: "20050383-1ca2-4e8f-bfd8-3acafd8ddc2c" # lakehouse guid bronze to be replaced , this is dev
+      replace_value:
+          dev: "20050383-1ca2-4e8f-bfd8-3acafd8ddc2c"  
+          sandpit: "e488e40e-7efa-4885-ae08-f37074408af5"
+          # TEST: "e488e40e-7efa-4885-ae08-f37074408af5"
+          # PROD: "prod-lakehouse-id"
+
+# lakehouse workspace ID to be replaced (using regex pattern) in notebook
+    - find_value:  \#\s*META\s+"default_lakehouse_workspace_id":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+      replace_value:
+          _ALL_: "$workspace.$id"  #workspace ID of the target environment (dynamic)
+      is_regex: "true"
+      file_path: "**/notebook-content.py"
+
+key_value_replace:
+  - find_key: $.properties.activities[*]..workspaceId  
+    replace_value:
+        dev: "7d828536-a77b-4966-811c-c3b7a0c2770b"
+        sandpit: "6dbc43f2-b760-4fd8-873c-2889dd7eb78d"
+    #   TEST: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #   PROD: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    item_type: "DataPipeline" 
+    item_name: ["Pl__EOMA", "Pl__Expense_Journal"] # filter on specific pipeline
+
+  - find_key: $.properties.activities[*].typeProperties.source..workspaceId 
+    replace_value:
+        dev: "7d828536-a77b-4966-811c-c3b7a0c2770b"
+        sandpit: "6dbc43f2-b760-4fd8-873c-2889dd7eb78d"
+    #   TEST: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #   PROD: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    item_type: "DataPipeline" 
+    item_name: ["Pl__Export_EOM_Data", "Pl__Export_ExpJournal_Data"] # filter on specific pipeline    
+
+# To write to dev-finops and prod-finops workspaceId
+  - find_key: $.properties.activities[*].typeProperties.sink..workspaceId
+    replace_value:
+        dev: "30bed2ca-613d-4599-ba23-af433407521c" # In dev and sandpit both writing to dev-finops
+        sandpit: "30bed2ca-613d-4599-ba23-af433407521c"
+    #   TEST: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #   PROD: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    item_type: "DataPipeline" 
+    item_name: ["Pl__Export_EOM_Data", "Pl__Export_ExpJournal_Data"] # filter on specific pipeline    
+
+# To write to dev-finops and prod-finops lakehouseId
+  - find_key: $.properties.activities[*].typeProperties.sink..artifactId
+    replace_value:
+        dev: "c5970f9a-a714-4eb7-83c8-7dcc73499a76" # In dev and sandpit both writing to dev-finops
+        sandpit: "c5970f9a-a714-4eb7-83c8-7dcc73499a76"
+    #   TEST: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #   PROD: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    item_type: "DataPipeline" 
+    item_name: ["Pl__Export_EOM_Data", "Pl__Export_ExpJournal_Data"] # filter on specific pipeline          
+
+# Workspace Identity to Invoke Pipeline
+  - find_key: $.properties.activities[*].externalReferences.connection
+    replace_value:
+      dev: "af77dd0e-5de6-4626-8938-b5c96c609777"  # "-DATA-PLATFORM-DEV - Workspace Identity" to invoke pipeline
+      sandpit: "224a29aa-179f-4572-a609-f7838f420ca7" # -DATA-PLATFORM-SANDPIT - Workspace Identity
+    #   TEST: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #   PROD: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    item_type: "DataPipeline"
+    item_name: "Pl__Master"   
+    # file_path: "Pl__Master**/*.json"
+
+  - find_key: $.schedules[?(@.jobType=="Execute")].enabled
+    replace_value:
+        dev: false
+        sandpit: false
+        # TEST: false
+        # PROD: true
+    file_path: "**/.schedules"
+
+# semantic_model_binding:
+#     # Default connection for all models not explicitly listed
+#     default:
+#         connection_id:
+#             dev: "e3f5fb84-4c0b-49a7-b098-bdf99a4077e8" # gold _Data_Platform_Dev_Gold_whs
+#             sandpit: "754c4183-bd44-4b49-9c4e-a3d1ebf7df45" # _Data_Platform_Sandpit_Gold_whs
+            # test: <PROD-connection_guid>
+            # prod: <PROD-connection_guid>
+            # OR use _ALL_ for same connection across environments
+            # _ALL_: <connection_guid>
+
+#     # Explicit bindings override default
+#     models:
+#         - semantic_model_name: "<semantic_model_name>"
+#           connection_id:
+#               PPE: <PPE-connection_guid>
+#               PROD: <PROD-connection_guid>
+
+#         - semantic_model_name: ["<semantic_model_name1>", "<semantic_model_name2>", ...]
+#           connection_id:
+#               _ALL_: <connection_guid>
+
+# find_replace:
+#     # SQL Connection Guid
+#     "db52be81-c2b2-4261-84fa-840c67f4bbd0":
+#         PPE: "81bbb339-8d0b-46e8-bfa6-289a159c0733"
+#         PROD: "5d6a1b16-447f-464a-b959-45d0fed35ca0"
+
+# key_value_replace:
+#     - find_key: $.variables[?(@.name=="Environment")].value
+#       replace_value:
+#           PPE: "PPE"
+#           PROD: "PROD"
+
+# spark_pool:
+#     - instance_pool_id: "your-dev-pool-instance-id"
+#       replace_value:
+#           PPE:
+#               type: "Capacity"
+#               name: "PPE-Pool-name"
+#           PROD:
+#               type: "Capacity"
+#               name: "PROD-Pool-name"
+
+# semantic_model_binding:
+#     default:
+#         connection_id:
+#             PPE: "PPE-connection_id"
+#             PROD: "PROD-connection_id"
+#     models:
+#         - semantic_model_name: "semantic_model_name"
+#           connection_id:
+#               PPE: "PPE-connection_id"
+#               PROD: "PROD-connection_id"

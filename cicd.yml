@@ -1,0 +1,74 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - fabric/**
+
+parameters:
+  - name: targetEnv
+    type: string
+    default: dev
+    values:
+      - dev
+      - sandpit
+      # - test 
+
+variables:
+- group: fabric-cicd-config 
+
+# Workspace mapping (REPLACES config.yml)
+# - name: DEV_WORKSPACE_ID
+#   value: 7d828536-a77b-4966-811c-c3b7a0c2770b
+
+# - name: SANDPIT_WORKSPACE_ID
+#   value: 6dbc43f2-b760-4fd8-873c-2889dd7eb78d
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+- checkout: self
+
+- script: |
+    python -m pip install --upgrade pip
+    python -m pip install fabric-cicd
+  displayName: 'Install fabric-cicd library'
+
+# # =========================
+# # 🔍 ACCESS CHECK (FAIL FAST)
+# # =========================
+# - task: AzureCLI@2
+#   displayName: "🔍 Run SPN Access Script"
+#   inputs:
+#     azureSubscription: "fabric-cicd-dev-spn"
+#     scriptType: bash
+#     scriptLocation: inlineScript
+#     failOnStandardError: true
+#     inlineScript: |
+#       set -e
+
+#       chmod +x utils/fabric-access-check.sh
+#       ./utils/fabric-access-check.sh
+
+# ============================
+# DEPLOY FUNCTION 
+# ============================
+- task: AzureCLI@2
+  displayName: '🚀 Deploy to ${{ parameters.targetEnv }} fabric workspace'
+  inputs:
+    azureSubscription: 'fabric-cicd-dev-spn'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "🚀 Deploying to ${{ parameters.targetEnv }}"
+
+      export FABRIC_TENANT_ID="$(FABRIC_TENANT_ID)"
+      export FABRIC_CLIENT_ID="$(FABRIC_CLIENT_ID)"
+
+      export TARGET_ENV="${{ parameters.targetEnv }}"
+      python deploy.py
+
+
